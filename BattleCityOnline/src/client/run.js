@@ -4,6 +4,7 @@ require({
         { name: 'dojo' }, 
         { name: 'dijit' }, 
 
+        { name: 'domReady' }, 
         { name: 'meld', main: 'meld' }, 
         { name: 'when', main: 'when' }, 
         { name: 'wire', main: 'wire' },

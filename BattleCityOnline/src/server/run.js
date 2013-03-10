@@ -4,9 +4,9 @@ require({
 		{ name: "dojo", location: "." },
 		
 		// Wire et al.
-		{ name: "meld", location: "../../lib/meld", main: "meld" },
-		{ name: "when", location: "../../lib/when", main: "when" },
-		{ name: "wire", location: "../../lib/wire", main: "wire" },
+		{ name: "meld", location: "../../amd_modules/meld", main: "meld" },
+		{ name: "when", location: "../../amd_modules/when", main: "when" },
+		{ name: "wire", location: "../../amd_modules/wire", main: "wire" },
 		
         // bco common
         { name: "bco-common", location: "../../src/common" },

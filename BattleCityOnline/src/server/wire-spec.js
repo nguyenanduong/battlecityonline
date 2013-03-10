@@ -17,8 +17,9 @@ define({
                     { name: "dcl", path: "amd_modules/dcl" },
                     { name: "frozen", path: "amd_modules/frozen" },
 
+                    { name: "domReady", path: "amd_modules/domReady" },
                     { name: "meld", path: "amd_modules/meld" },
-                    { name: "when", path: "amd_modulesib/when" },
+                    { name: "when", path: "amd_modules/when" },
                     { name: "wire", path: "amd_modules/wire" },
                     
                     { name: "bco-common", path: "src/common" },

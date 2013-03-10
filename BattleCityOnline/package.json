@@ -11,6 +11,7 @@
     "dependencies": {
       "dojo": "1.8.3",
       "dijit": "1.8.3",
+      "domReady": "2.0.1",
       "wire": "0.9.1",
       "frozen": "0.2.1"
     }

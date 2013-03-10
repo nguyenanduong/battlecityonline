@@ -6,8 +6,10 @@ define([
     _Object) {
     
     return declare([_Object], {
+        viewContainer: null,
+        
         run: function () {
-            
+            viewContainer.startup();    
         }
     });
 });
