@@ -1,4 +1,8 @@
 define({
+	demoGameWidget: {
+		module: "bco-client/DemoGame"
+	},
+	
     viewContainer: {
         create: {
             module: "bco-client/ViewContainer",
@@ -6,7 +10,11 @@ define({
                 {
                     defaultView: "home",
                     views: {
-                        home: {}
+                        home: {
+                        	center: { 
+                        		widget: { $ref: "demoGameWidget" }
+                        	}
+                        }
                     }
                 },
                 

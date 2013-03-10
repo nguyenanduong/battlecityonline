@@ -15,7 +15,7 @@ define({
 
                     { name: "box2d-html5", path: "amd_modules/box2d-html5" },
                     { name: "dcl", path: "amd_modules/dcl" },
-                    { name: "frozen", path: "amd_modules/frozen" },
+                    { name: "frozen", path: "amd_modules/frozen/src" },
 
                     { name: "domReady", path: "amd_modules/domReady" },
                     { name: "meld", path: "amd_modules/meld" },
