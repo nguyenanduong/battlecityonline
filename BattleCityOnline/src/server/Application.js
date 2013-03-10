@@ -11,26 +11,33 @@ define([
         express: null,
         port: null,
         
+        clientModules: null,
+        
+        postscript: function () {
+            this.inherited(arguments);
+        },
+        
         run: function () {
             var app = this.express();
             
             app.configure((function () {
-                app.use(this.express.bodyParser());
-                app.use(this.express.methodOverride());
-                
-                app.use(app.router);
+                this.clientModules.forEach(function(module) {
+                    app.use("/script/" + module.name, this.express.static(module.path));                       
+                }, this);
                 
                 app.use(this.express.static("public_html"));
                 
-                app.use(function(err, req, res, next){
-                    console.error(err.stack);
-                    res.send(500, err);
-                });
+                app.use(this._handleServerError);
             }).bind(this));
             
             var port = this.port || 80;
             app.listen(port);
             console.log("Listening on " + port);
+        },
+        
+        _handleServerError: function (err, req, res, next) {
+            console.error(err.stack);
+            res.send(500, err);
         }
     });
 });

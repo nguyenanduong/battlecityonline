@@ -16,6 +16,6 @@ require({
 	]
 }, ["wire!bco-server/wire-spec"], function (wireSpec) {
     
-	var serverApp = wireSpec.application;
-	serverApp.run();
+	var app = wireSpec.application;
+	app.run();
 });
