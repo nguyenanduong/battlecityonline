@@ -1,15 +1,18 @@
 {
-    "name": "battlecityonline",
-    "description": "Battle City Online",
-    "version": "0.0.1",
-    "private": true,
+  "name": "battlecityonline",
+  "description": "Battle City Online",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "3.x"
+  },
+  "jam": {
+    "packageDir": "amd_modules",
     "dependencies": {
-        "express": "3.x"
-    },
-    "jam": {
-        "packageDir": "lib",
-        "dependencies": {
-            "wire": "0.9.1"
-        }
+      "dojo": "1.8.3",
+      "dijit": "1.8.3",
+      "wire": "0.9.1",
+      "frozen": "0.2.1"
     }
+  }
 }
