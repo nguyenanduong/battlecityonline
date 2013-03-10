@@ -1,19 +1,27 @@
 define([
     "dojo/_base/declare",
+    "dojo/_base/lang",
     "dojo/router",
     
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
     
+    "dijit/layout/BorderContainer",
+    "dijit/layout/ContentPane",
+    
     "dojo/text!./template/ViewContainer.html"
 ], function (
     declare,
+    lang,
     router,
     
     _WidgetBase, 
     _TemplatedMixin, 
     _WidgetsInTemplateMixin,
+    
+    BorderContainer,
+    ContentPane,
     
     template) {
     
@@ -28,7 +36,7 @@ define([
         postCreate: function () {
             this.inherited(arguments);
 
-            router.register(/^(\w*)\?(.*)$/, lang.hitch(this, function (evt) {
+            router.register(/^(\w*)\?(.*)$/, (this, function (evt) {
                 var viewName = evt.params[0],
                     paramString = evt.params[1],
                     paramHash = {};
@@ -41,7 +49,7 @@ define([
                 }
                                 
                 this._loadView(viewName, paramHash);
-            }));
+            }).bind(this));
 
             router.startup();   
         },
