@@ -33,7 +33,7 @@ define([
 	nyanImg, 
 	yarnImg) {
 	
-	return declare([_WidgetBase, TemplatedMixin], {
+	return declare([_WidgetBase, _TemplatedMixin], {
 		templateString: template,
 		
 		postCreate: function () {

@@ -1,4 +1,8 @@
 define({
+	box2D: {
+		module: "box2dweb"
+	},
+	
 	demoGameWidget: {
 		module: "bco-client/DemoGame"
 	},

@@ -13,7 +13,7 @@ define({
                     { name: "dojo", path: "amd_modules/dojo" },
                     { name: "dijit", path: "amd_modules/dijit" },
 
-                    { name: "box2d-html5", path: "amd_modules/box2d-html5" },
+                    { name: "box2dweb", path: "amd_modules/box2dweb" },
                     { name: "dcl", path: "amd_modules/dcl" },
                     { name: "frozen", path: "amd_modules/frozen/src" },
 

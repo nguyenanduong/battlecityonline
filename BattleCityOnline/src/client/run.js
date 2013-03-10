@@ -10,7 +10,7 @@ require({
         { name: "wire", main: "wire" },
 
         { name: "dcl", main: "dcl" }, 
-        { name: "box2d-html5", main: "box2d-html5" }, 
+        { name: "box2dweb", main: "Box2D" }, 
         { name: "frozen" }, 
 
         { name: "bco-client" },

@@ -1,18 +1,15 @@
 define([
     "dojo/_base/declare",    
-    "bco-common/_Object",
-    "box2d-html5"
+    "bco-common/_Object"
 ], function (
     declare,
-    _Object,
-    box2d) {
+    _Object) {
 	
     return declare([_Object], {
         viewContainer: null,
         
         run: function () {
-        	this._loadB2();
-            viewContainer.startup();    
+        	viewContainer.startup();    
         }
     });
 });
