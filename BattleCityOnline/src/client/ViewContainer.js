@@ -79,7 +79,7 @@ define([
         
         _unloadCurrentView: function () {
             if (this._currentViewWidgets) {
-                array.forEach(this._currentViewWidgets, function (widget) {
+                this._currentViewWidgets.forEach(function (widget) {
                     widget.destroy();
                 });
                 this._currentViewWidgets = [];

@@ -12,9 +12,9 @@ define([
 	
 	"dojo/text!./template/DemoGame.html",
 	
-	"frozen/plugins/loadImage!./image/background.png",
-	"frozen/plugins/loadImage!./image/nyan.png",
-	"frozen/plugins/loadImage!./image/yarn.png"
+	"frozen/plugins/loadImage!script/bco-client/image/background.png",
+	"frozen/plugins/loadImage!script/bco-client/image/nyan.png",
+	"frozen/plugins/loadImage!script/bco-client/image/yarn.png"
 ], function(
 	declare,
 	keys, 
@@ -49,7 +49,7 @@ define([
 
 			//setup a GameCore instance
 			var game = new BoxGame({
-				canvasId: "gameCanvas",
+				canvas: this._canvas,
 				initInput: function(im){
 					//tells the input manager to listen for key events
 					im.addKeyAction(keys.LEFT_ARROW);
