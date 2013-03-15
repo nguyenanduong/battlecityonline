@@ -15,7 +15,10 @@ define([
 	"frozen/plugins/loadImage!script/bco-client/image/concrete_r_t.png",
 	"frozen/plugins/loadImage!script/bco-client/image/concrete_r_b.png",
 
-	"frozen/plugins/loadImage!script/bco-client/image/player1_0.png"
+	"frozen/plugins/loadImage!script/bco-client/image/player1_0_up.png",
+	"frozen/plugins/loadImage!script/bco-client/image/player1_0_down.png",
+	"frozen/plugins/loadImage!script/bco-client/image/player1_0_left.png",
+	"frozen/plugins/loadImage!script/bco-client/image/player1_0_right.png"
 ], function(
 	declare,
 	keys,
@@ -33,7 +36,10 @@ define([
 	concrete_r_t,
 	concrete_r_b,
 
-	player1_0) {
+	player1_0_up,
+	player1_0_down,
+	player1_0_left,
+	player1_0_right) {
 	
 	return declare([BoxGame], {
 		canvas: null,
@@ -82,15 +88,70 @@ define([
 		handleInput: function (im) {
 			this.inherited(arguments);
 			
+			var scale = this.box.scale;
+			var currX = this._player1.x * scale,
+				currY = this._player1.y * scale;
+
 			if (im.keyActions[keys.UP_ARROW].isPressed()) {
-				this.box.applyForce(this._player1.id, Math.PI / 2, 50);
+				if (this._player1.direction === "left") {
+					currX = this._normalizePos(currX, 0);
+				} else if (this._player1.direction === "right") {
+					currX = this._normalizePos(currX, 1);
+				}
+
+				this._player1.direction = "up";
+
+				this.box.setPosition(this._player1.id, currX / scale, (currY - 1.5) / scale);
+			} else if (im.keyActions[keys.DOWN_ARROW].isPressed()) {
+				if (this._player1.direction === "left") {
+					currX = this._normalizePos(currX, 0);
+				} else if (this._player1.direction === "right") {
+					currX = this._normalizePos(currX, 1);
+				}
+
+				this._player1.direction = "down";
+				this.box.setPosition(this._player1.id, currX / scale, (currY + 1.5) / scale);
+			} else if (im.keyActions[keys.LEFT_ARROW].isPressed()) {
+				if (this._player1.direction === "up") {
+					currX = this._normalizePos(currX, 0);
+				} else if (this._player1.direction === "down") {
+					currX = this._normalizePos(currX, 1);
+				}
+
+				this._player1.direction = "left";
+				this.box.setPosition(this._player1.id, (currX - 1.5) / scale, currY / scale);
+			} else if (im.keyActions[keys.RIGHT_ARROW].isPressed()) {
+				if (this._player1.direction === "up") {
+					currX = this._normalizePos(currX, 0);
+				} else if (this._player1.direction === "down") {
+					currX = this._normalizePos(currX, 1);
+				}
+
+				this._player1.direction = "right";
+				this.box.setPosition(this._player1.id, (currX + 1.5) / scale, currY / scale);
 			}
+		},
+
+		_normalizePos: function (x, increase) {
+			return (Math.floor(x / 4) + increase) * 4;
 		},
 
 		init: function () {
 			this.inherited(arguments);
 			
 			this.box.setGravity({ x: 0.0, y: 0.0 });
+			this.box.resolveCollisions = true;
+			this.box.addContactListener({
+				beginContact: function (arguments) {
+					console.log(arguments);
+				},
+				endContact: function (arguments) {
+					console.log(arguments);
+				},
+				postSolve: function (arguments) {
+					console.log(arguments);
+				}
+			});
 
 			// add a player
 			this._player1 = this._createPlayer(1);
@@ -112,7 +173,7 @@ define([
 							this._createTile(rowIndex, cellIndex, "concrete", "l_b");
 
 							break;
-						case 3: // forest
+						case 3: // forrest
 							break;
 						case 4: // ice
 							break;
@@ -129,20 +190,33 @@ define([
 				id: "player_" + id,
 				x: 144,
 				y: 400,
-				halfWidth: 16,
-				halfHeight: 16,
+				halfWidth: 15,
+				halfHeight: 15,
 				restitution: 0,
 				friction: 0,
 				staticBody: false,
+				direction: "up",
 				draw: function(ctx) {
 					ctx.save();
-					
-					ctx.translate(this.x * this.scale, this.y * this.scale);
-					ctx.rotate(this.angle);
-					ctx.translate(-(this.x) * this.scale, -(this.y) * this.scale);
 
+					var playerImg;
+					switch (this.direction) {
+						case "up":
+							playerImg = player1_0_up;
+							break;
+						case "down":
+							playerImg = player1_0_down;
+							break;
+						case "left":
+							playerImg = player1_0_left;
+							break;
+						case "right":
+							playerImg = player1_0_right;
+							break;
+					}
+					
 					ctx.drawImage(
-						player1_0,
+						playerImg,
 						(this.x-this.halfWidth) * this.scale,
 						(this.y-this.halfHeight) * this.scale
 					);
@@ -168,14 +242,12 @@ define([
 				y: rowIndex * 16 + self._cornerOffset[corner] .y+ 4,
 				halfWidth: 4,
 				halfHeight: 4,
+				estitution: 0,
+				friction: 0,
 				staticBody: true,
 				draw: function(ctx) {
 					ctx.save();
 					
-					ctx.translate(this.x * this.scale, this.y * this.scale);
-					ctx.rotate(this.angle);
-					ctx.translate(-(this.x) * this.scale, -(this.y) * this.scale);
-
 					ctx.drawImage(
 						self._tileImage[tileType][corner],
 						(this.x-this.halfWidth) * this.scale,
