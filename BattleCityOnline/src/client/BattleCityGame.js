@@ -6,6 +6,9 @@ define([
 	"frozen/box2d/RectangleEntity",
 
 	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_up.png",
+	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_down.png",
+	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_left.png",
+	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_right.png",
 	"frozen/plugins/loadImage!script/bco-client/image/explosion.png",
 
 	"frozen/plugins/loadImage!script/bco-client/image/brick_l_b.png",
@@ -30,6 +33,9 @@ define([
 	Rectangle, 
 
 	bullet_0_up,
+	bullet_0_down,
+	bullet_0_left,
+	bullet_0_right,
 	explosion,
 
 	brick_l_b,
@@ -154,12 +160,59 @@ define([
 			if (im.keyActions[keys.SPACE].isPressed()) {
 				if (!this._firing) {
 					this._firing = true;
-					this._createBullet(this._player1.x * this.box.scale - 22, this._player1.y * this.box.scale);
+
+					var position, velocity;
+
+					switch (this._player1.direction) {
+						case "up":
+							position = {
+								x: this._player1.x * this.box.scale, 
+								y: this._player1.y * this.box.scale - 22
+							};
+							velocity = {
+								x: 0,
+								y: -30
+							};
+							break;
+						case "down":
+							position = {
+								x: this._player1.x * this.box.scale, 
+								y: this._player1.y * this.box.scale + 22
+							};
+							velocity = {
+								x: 0,
+								y: 30
+							};
+							break;
+						case "left":
+							position = {
+								x: this._player1.x * this.box.scale - 22, 
+								y: this._player1.y * this.box.scale
+							};
+							velocity = {
+								x: -30,
+								y: 0
+							};
+							break;
+						case "right":
+							position = {
+								x: this._player1.x * this.box.scale + 22, 
+								y: this._player1.y * this.box.scale
+							};
+							velocity = {
+								x: 30,
+								y: 0
+							};
+							break;
+					}
+
+					this._createBullet(position, velocity);
 				}
 			}
 		},
 
 		_normalizePos: function (x, increase) {
+			console.log(Math.round(x / 16) * 16);
 			return Math.round(x / 16) * 16;
 		},
 
@@ -171,9 +224,15 @@ define([
 			this.box.setGravity({ x: 0.0, y: 0.0 });
 			this.box.resolveCollisions = true;
 			this.box.addContactListener({
-				beginContact: function (obj1) {
-					console.log("Fired", arguments);
-					self.entities[obj1].state = "exploded";
+				beginContact: function (obj1, obj2) {
+					if (obj1.indexOf("bullet_") === 0) {
+						console.log("Fired", arguments);
+						self.entities[obj1].state = "exploded";
+
+						if (obj2.indexOf("tile_") === 0) {
+							self.entities[obj2].state = "dead";						
+						}
+					}
 				},
 				endContact: function () {
 				},
@@ -328,7 +387,7 @@ define([
 				y: rowIndex * 16 + self._cornerOffset[corner] .y+ 4,
 				halfWidth: 4,
 				halfHeight: 4,
-				estitution: 0,
+				restitution: 0,
 				friction: 0,
 				staticBody: true,
 				draw: function(ctx) {
@@ -350,12 +409,24 @@ define([
 			return tile;
 		},
 
-		_createBullet: function (x, y, velocity) {
+		_createBullet: function (position, velocity) {
 			var self = this;
+			var bulletImg;
+			
+			if (velocity.x > 0) {
+				bulletImg = bullet_0_right;
+			} else if (velocity.x < 0) {
+				bulletImg = bullet_0_left;
+			} else if (velocity.y > 0) {
+				bulletImg = bullet_0_down;
+			} else if (velocity.y < 0) {
+				bulletImg = bullet_0_up;
+			}
+
 			var bullet = new Rectangle({
 				id: "bullet_",
-				x: x,
-				y: y,
+				x: position.x,
+				y: position.y,
 				halfWidth: 4,
 				halfHeight: 4,
 				restitution: 0,
@@ -373,7 +444,7 @@ define([
 						this.state = "dead";
 					} else {
 						ctx.drawImage(
-							bullet_0_up,
+							bulletImg,
 							(this.x-this.halfWidth) * this.scale,
 							(this.y-this.halfHeight) * this.scale
 						);
@@ -385,7 +456,7 @@ define([
 
 			this.box.addBody(bullet);
 			this.entities[bullet.id] = bullet;
-			this.box.setLinearVelocity(bullet.id, -30, 0);
+			this.box.setLinearVelocity(bullet.id, velocity.x, velocity.y);
 			return bullet;
 		}
 	});
