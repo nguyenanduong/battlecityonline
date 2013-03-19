@@ -5,6 +5,9 @@ define([
 	"frozen/box2d/BoxGame",
 	"frozen/box2d/RectangleEntity",
 
+	"bco-client/entity/BrickTile",
+	"bco-client/entity/ConcreteTile",
+
 	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_up.png",
 	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_down.png",
 	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_left.png",
@@ -31,6 +34,9 @@ define([
 	
 	BoxGame, 
 	Rectangle, 
+
+	BrickTile,
+	ConcreteTile,
 
 	bullet_0_up,
 	bullet_0_down,
@@ -225,6 +231,7 @@ define([
 			this.box.resolveCollisions = true;
 			this.box.addContactListener({
 				beginContact: function (obj1, obj2) {
+					/*console.log(obj1, obj2)
 					if (obj1.indexOf("bullet_") === 0) {
 						console.log("Fired", arguments);
 						self.entities[obj1].state = "exploded";
@@ -232,6 +239,13 @@ define([
 						if (obj2.indexOf("tile_") === 0) {
 							self.entities[obj2].state = "dead";						
 						}
+					}*/
+
+					if (self.entities[obj1].beginContact) {
+						self.entities[obj1].beginContact(self.entities[obj2]);
+					}
+					if (self.entities[obj2].beginContact) {
+						self.entities[obj2].beginContact(self.entities[obj1]);
 					}
 				},
 				endContact: function () {
@@ -248,17 +262,31 @@ define([
 				row.forEach(function(cell, cellIndex) {
 					switch (cell) {
 						case 1: // brick
-							this._createTile(rowIndex, cellIndex, "brick", "l_t");
+							/*this._createTile(rowIndex, cellIndex, "brick", "l_t");
 							this._createTile(rowIndex, cellIndex, "brick", "r_t");
 							this._createTile(rowIndex, cellIndex, "brick", "r_b");
-							this._createTile(rowIndex, cellIndex, "brick", "l_b");
+							this._createTile(rowIndex, cellIndex, "brick", "l_b");*/
+
+							//TODO: TileFactory
+							this._addEntity(new BrickTile({
+								id: "tile_" + rowIndex + "_" + cellIndex,
+								x: cellIndex * 16 + 8,
+								y: rowIndex * 16 + 8
+							}));
 
 							break;
 						case 2: // concrete
-							this._createTile(rowIndex, cellIndex, "concrete", "l_t");
+							/*this._createTile(rowIndex, cellIndex, "concrete", "l_t");
 							this._createTile(rowIndex, cellIndex, "concrete", "r_t");
 							this._createTile(rowIndex, cellIndex, "concrete", "r_b");
-							this._createTile(rowIndex, cellIndex, "concrete", "l_b");
+							this._createTile(rowIndex, cellIndex, "concrete", "l_b");*/
+
+							//TODO: TileFactory
+							this._addEntity(new ConcreteTile({
+								id: "tile_" + rowIndex + "_" + cellIndex,
+								x: cellIndex * 16 + 8,
+								y: rowIndex * 16 + 8
+							}));
 
 							break;
 						case 3: // forrest
@@ -272,6 +300,15 @@ define([
 			}, this);
 
 			this._createWalls();
+		},
+
+		_addEntity: function (entity) {
+			this.box.addBody(entity);
+
+			//shims
+			this.box.bodiesMap[entity.id].GetFixtureList().SetSensor(entity.isSensor);
+
+			this.entities[entity.id] = entity;
 		},
 
 		_createWalls: function () {

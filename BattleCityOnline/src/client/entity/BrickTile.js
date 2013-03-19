@@ -1,13 +1,17 @@
 define([
 	"dojo/_base/declare",
 
-	"bco-client/entity/Tile"
+	"bco-client/entity/Tile",
+
+	"frozen/plugins/loadImage!script/bco-client/image/brick.png"	
 ], function (
 	declare,
 	
-	Tile) {
+	Tile,
+
+	brickTileImage) {
 
 	return declare([Tile], {
-
+		tileImage: brickTileImage
 	});
 });
