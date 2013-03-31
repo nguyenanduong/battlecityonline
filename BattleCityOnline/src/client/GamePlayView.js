@@ -5,7 +5,10 @@ define([
 	"dijit/_TemplatedMixin",
 	
 	"bco-client/BattleCityGame",
-	"bco-client/map/stage1",
+
+	"bco-client/HttpGameHost",
+	"bco-client/LocalGameHost",
+	"bco-client/map/stageX",
 
 	"dojo/text!./template/DemoGame.html"
 ], function(
@@ -15,19 +18,28 @@ define([
 	_TemplatedMixin,
 	
 	BattleCityGame, 
+
+	HttpGameHost,
+	LocalGameHost,
 	stage1,
 	
 	template) {
 	
 	return declare([_WidgetBase, _TemplatedMixin], {
 		templateString: template,
+
+		color: null,
 		
 		postCreate: function () {
 			this.inherited(arguments);
 
 			var game = new BattleCityGame({
 				canvas: this._canvas,
-				stageSpec: stage1
+				stageSpec: stage1,
+				playerColor: this.color,
+				gameHost: new HttpGameHost({
+					clientId: this.color
+				})
 			});
 
 			game.run();

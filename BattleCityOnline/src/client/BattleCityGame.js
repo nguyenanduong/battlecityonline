@@ -1,225 +1,165 @@
 define([
     "dojo/_base/declare",
     "dojo/keys",
+    "dojo/when",
 
-	"frozen/box2d/BoxGame",
-	"frozen/box2d/RectangleEntity",
+    "bco-client/entity/BrickTile",
+    "bco-client/entity/ConcreteTile",
+    "bco-client/entity/ForestTile",
+    "bco-client/entity/IceTile",
+    "bco-client/entity/WaterTile",
+    "bco-client/entity/Wall",
 
-	"bco-client/entity/BrickTile",
-	"bco-client/entity/ConcreteTile",
+    "bco-client/entity/Player",
 
-	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_up.png",
-	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_down.png",
-	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_left.png",
-	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_right.png",
-	"frozen/plugins/loadImage!script/bco-client/image/explosion.png",
-
-	"frozen/plugins/loadImage!script/bco-client/image/brick_l_b.png",
-	"frozen/plugins/loadImage!script/bco-client/image/brick_l_t.png",
-	"frozen/plugins/loadImage!script/bco-client/image/brick_r_t.png",
-	"frozen/plugins/loadImage!script/bco-client/image/brick_r_b.png",
-
-	"frozen/plugins/loadImage!script/bco-client/image/concrete_l_b.png",
-	"frozen/plugins/loadImage!script/bco-client/image/concrete_l_t.png",
-	"frozen/plugins/loadImage!script/bco-client/image/concrete_r_t.png",
-	"frozen/plugins/loadImage!script/bco-client/image/concrete_r_b.png",
-
-	"frozen/plugins/loadImage!script/bco-client/image/player1_0_up.png",
-	"frozen/plugins/loadImage!script/bco-client/image/player1_0_down.png",
-	"frozen/plugins/loadImage!script/bco-client/image/player1_0_left.png",
-	"frozen/plugins/loadImage!script/bco-client/image/player1_0_right.png"
+	"frozen/box2d/BoxGame"
 ], function(
 	declare,
 	keys,
-	
-	BoxGame, 
-	Rectangle, 
+	when,
 
 	BrickTile,
 	ConcreteTile,
+	ForestTile,
+	IceTile,
+	WaterTile,
 
-	bullet_0_up,
-	bullet_0_down,
-	bullet_0_left,
-	bullet_0_right,
-	explosion,
+	Wall,
 
-	brick_l_b,
-	brick_l_t,
-	brick_r_t,
-	brick_r_b, 
-
-	concrete_l_b,
-	concrete_l_t,
-	concrete_r_t,
-	concrete_r_b,
-
-	player1_0_up,
-	player1_0_down,
-	player1_0_left,
-	player1_0_right) {
+	Player,
+	
+	BoxGame) {
 	
 	return declare([BoxGame], {
 		canvas: null,
 		stageSpec: null,
+		playerColor: null,
+
+		gameHost: null,
 		
-		_cornerOffset: {
-			"l_t": { x: 0, y: 0 },
-			"r_t": { x: 8, y: 0 },
-			"r_b": { x: 8, y: 8 },
-			"l_b": { x: 0, y: 8 }
-		},
-
-		_tileImage: {
-			"brick": {
-				"l_t": brick_l_t,
-				"r_t": brick_r_t,
-				"r_b": brick_r_b,
-				"l_b": brick_l_b
-			},
-			"concrete": {
-				"l_t": concrete_l_t,
-				"r_t": concrete_r_t,
-				"r_b": concrete_r_b,
-				"l_b": concrete_l_b
-			}
-		},
-
 		draw: function(context) {
 			context.fillStyle = "#000";
 			context.fillRect(0, 0, 416, 416);
-			var entityId;
-			for (entityId in this.entities) {
-				this.entities[entityId].draw(context);
-			}
+
+			this._drawEntities(context);
 		},
 
-		preUpdate: function(context) {
-			var entityId;
+		_drawEntities: function(context) {
+			var entities = [];
+
 			for (entityId in this.entities) {
-				if (this.entities[entityId].state === "dead") {
-					// remove
-					this.box.removeBody(entityId);
-					delete this.entities[entityId];
-					this._firing = false;
-				}
+				entities.push(this.entities[entityId]);
+			}
+
+			entities.sort(function (entity1, entity2) {
+				return entity1.layerMask - entity2.layerMask;
+			});
+
+			entities.forEach(function (entity) {
+				entity.draw(context);
+			});
+		},
+
+		preUpdate: function() {
+			if (!this._commandHandled) {
+				return this.inherited(arguments);
+			}
+
+			this._commandHandled = false;
+
+			var entityId;
+
+			for (entityId in this.entities) {
+				this.entities[entityId].onBeforeUpdate();
 			}
 
 			this.inherited(arguments);
+
+			for (entityId in this.entities) {
+				this.entities[entityId].onAfterUpdate();
+			}
+
+			for (entityId in this.entities) {
+				if (this.entities[entityId].state === "dead") {
+					this.box.removeBody(entityId);
+					delete this.entities[entityId];
+				}
+			}			
+		},
+
+		handleInput: function (im, ellapsedTime) {
+			this.inherited(arguments);
+
+			if (this.gameHost.waiting) {
+				return;
+			}
+
+			var commands = [];
+
+			if (im.keyActions[keys.UP_ARROW].isPressed()) {
+				commands.push({
+					target: this.player.id,
+					name: "UP"
+				});
+				//this._player1.move("up");
+			} else if (im.keyActions[keys.DOWN_ARROW].isPressed()) {
+				commands.push({
+					target: this.player.id,
+					name: "DOWN"
+				});
+				//this._player1.move("down");
+			} else if (im.keyActions[keys.LEFT_ARROW].isPressed()) {
+				commands.push({
+					target: this.player.id,
+					name: "LEFT"
+				});
+				//this._player1.move("left");
+			} else if (im.keyActions[keys.RIGHT_ARROW].isPressed()) {
+				commands.push({
+					target: this.player.id,
+					name: "RIGHT"
+				});
+				//this._player1.move("right");
+			}
+
+			if (im.keyActions[keys.SPACE].isPressed()) {
+				commands.push({
+					target: this.player.id,
+					name: "FIRE"
+				});
+			}			
+
+			if (im.keyActions[keys.ENTER].isPressed()) {
+				commands.push({
+					name: "START"
+				});
+			}
+			
+			when(this.gameHost.sendCommands(commands), this.handleCommands.bind(this));
+		},
+
+		handleCommands: function (commands) {
+			commands.forEach(function (command) {
+				var entity = this.entities[command.target],
+					result = entity.command(command.name);
+
+				if (result) {
+					this._addEntity(result);
+				}
+			}, this);
+
+			this._commandHandled = true;
 		},
 
 		initInput: function (im) {
 			this.inherited(arguments);
 
+			im.addKeyAction(keys.ENTER);
 			im.addKeyAction(keys.LEFT_ARROW);
 			im.addKeyAction(keys.RIGHT_ARROW);
 			im.addKeyAction(keys.UP_ARROW);
 			im.addKeyAction(keys.DOWN_ARROW);
 			im.addKeyAction(keys.SPACE);
-		},
-
-		handleInput: function (im, ellapsedTime) {
-			this.inherited(arguments);
-			
-			var scale = this.box.scale;
-			var currX = this._player1.x * scale,
-				currY = this._player1.y * scale;
-
-			if (im.keyActions[keys.UP_ARROW].isPressed()) {
-				if (this._player1.direction === "left") {
-					currX = this._normalizePos(currX, 0);
-				} else if (this._player1.direction === "right") {
-					currX = this._normalizePos(currX, 1);
-				}
-
-				this._player1.direction = "up";
-
-				this.box.setPosition(this._player1.id, currX / scale, (currY - 2) / scale);
-			} else if (im.keyActions[keys.DOWN_ARROW].isPressed()) {
-				if (this._player1.direction === "left") {
-					currX = this._normalizePos(currX, 0);
-				} else if (this._player1.direction === "right") {
-					currX = this._normalizePos(currX, 1);
-				}
-
-				this._player1.direction = "down";
-				this.box.setPosition(this._player1.id, currX / scale, (currY + 2) / scale);
-			} else if (im.keyActions[keys.LEFT_ARROW].isPressed()) {
-				if (this._player1.direction === "up") {
-					currX = this._normalizePos(currX, 0);
-				} else if (this._player1.direction === "down") {
-					currX = this._normalizePos(currX, 1);
-				}
-
-				this._player1.direction = "left";
-				this.box.setPosition(this._player1.id, (currX - 2) / scale, currY / scale);
-			} else if (im.keyActions[keys.RIGHT_ARROW].isPressed()) {
-				if (this._player1.direction === "up") {
-					currX = this._normalizePos(currX, 0);
-				} else if (this._player1.direction === "down") {
-					currX = this._normalizePos(currX, 1);
-				}
-
-				this._player1.direction = "right";
-				this.box.setPosition(this._player1.id, (currX + 2) / scale, currY / scale);
-			} 
-			if (im.keyActions[keys.SPACE].isPressed()) {
-				if (!this._firing) {
-					this._firing = true;
-
-					var position, velocity;
-
-					switch (this._player1.direction) {
-						case "up":
-							position = {
-								x: this._player1.x * this.box.scale, 
-								y: this._player1.y * this.box.scale - 22
-							};
-							velocity = {
-								x: 0,
-								y: -30
-							};
-							break;
-						case "down":
-							position = {
-								x: this._player1.x * this.box.scale, 
-								y: this._player1.y * this.box.scale + 22
-							};
-							velocity = {
-								x: 0,
-								y: 30
-							};
-							break;
-						case "left":
-							position = {
-								x: this._player1.x * this.box.scale - 22, 
-								y: this._player1.y * this.box.scale
-							};
-							velocity = {
-								x: -30,
-								y: 0
-							};
-							break;
-						case "right":
-							position = {
-								x: this._player1.x * this.box.scale + 22, 
-								y: this._player1.y * this.box.scale
-							};
-							velocity = {
-								x: 30,
-								y: 0
-							};
-							break;
-					}
-
-					this._createBullet(position, velocity);
-				}
-			}
-		},
-
-		_normalizePos: function (x, increase) {
-			console.log(Math.round(x / 16) * 16);
-			return Math.round(x / 16) * 16;
 		},
 
 		init: function () {
@@ -229,44 +169,74 @@ define([
 
 			this.box.setGravity({ x: 0.0, y: 0.0 });
 			this.box.resolveCollisions = true;
-			this.box.addContactListener({
-				beginContact: function (obj1, obj2) {
-					/*console.log(obj1, obj2)
-					if (obj1.indexOf("bullet_") === 0) {
-						console.log("Fired", arguments);
-						self.entities[obj1].state = "exploded";
-
-						if (obj2.indexOf("tile_") === 0) {
-							self.entities[obj2].state = "dead";						
-						}
-					}*/
-
-					if (self.entities[obj1].beginContact) {
-						self.entities[obj1].beginContact(self.entities[obj2]);
-					}
-					if (self.entities[obj2].beginContact) {
-						self.entities[obj2].beginContact(self.entities[obj1]);
-					}
-				},
-				endContact: function () {
-				},
-				postSolve: function () {
-				}
-			});
 			this.box.scale = 10;
 
-			// add a player
-			this._player1 = this._createPlayer(1);
+			this.box.addContactListener({
+				beginContact: function (id1, id2, b2Contact) {
+					var entity1 = self.entities[id1],
+						entity2 = self.entities[id2];
 
-			this.stageSpec.map.forEach(function (row, rowIndex) {
+					if (entity1.layerMask & entity2.layerMask) {
+						var entity1AllowContact = entity1.onBeginContact(entity2);
+							entity2AllowContact = entity2.onBeginContact(entity1);
+	
+						if (!entity1AllowContact && !entity2AllowContact) {
+							b2Contact.m_flags &= !0x0010;
+						}
+					}
+				},
+				endContact: function (id1, id2) {
+					var entity1 = self.entities[id1],
+						entity2 = self.entities[id2];
+						
+					if (entity1.layerMask & entity2.layerMask) {
+						entity1.onEndContact(entity2);
+						entity2.onEndContact(entity1);
+					}
+				}
+			});
+
+			// add a player
+			this._createPlayers(this.stageSpec.players);
+
+			this._createTiles(this.stageSpec.map);
+
+			this._createWalls(this.stageSpec.size.w, this.stageSpec.size.h);
+		},
+
+		_addEntity: function (entity) {
+			this.box.addBody(entity);
+
+			//shims
+			this.box.bodiesMap[entity.id].GetFixtureList().SetSensor(entity.isSensor);
+			entity.box = this.box;
+			this.entities[entity.id] = entity;
+		},
+
+		_createPlayers: function (players) {
+			players.forEach(function (player) {
+				var playerObj = new Player({
+					id: "player_" + player.color,
+					color: player.color,
+					x: player.x,
+					y: player.y,
+					speed: 4,
+					direction: player.direction
+				});
+				
+				this._addEntity(playerObj);
+
+				if (player.color === this.playerColor) {
+					this.player = playerObj;
+				}
+			}, this);
+		},
+
+		_createTiles: function (tiles) {
+			tiles.forEach(function (row, rowIndex) {
 				row.forEach(function(cell, cellIndex) {
 					switch (cell) {
 						case 1: // brick
-							/*this._createTile(rowIndex, cellIndex, "brick", "l_t");
-							this._createTile(rowIndex, cellIndex, "brick", "r_t");
-							this._createTile(rowIndex, cellIndex, "brick", "r_b");
-							this._createTile(rowIndex, cellIndex, "brick", "l_b");*/
-
 							//TODO: TileFactory
 							this._addEntity(new BrickTile({
 								id: "tile_" + rowIndex + "_" + cellIndex,
@@ -276,11 +246,6 @@ define([
 
 							break;
 						case 2: // concrete
-							/*this._createTile(rowIndex, cellIndex, "concrete", "l_t");
-							this._createTile(rowIndex, cellIndex, "concrete", "r_t");
-							this._createTile(rowIndex, cellIndex, "concrete", "r_b");
-							this._createTile(rowIndex, cellIndex, "concrete", "l_b");*/
-
 							//TODO: TileFactory
 							this._addEntity(new ConcreteTile({
 								id: "tile_" + rowIndex + "_" + cellIndex,
@@ -289,213 +254,64 @@ define([
 							}));
 
 							break;
-						case 3: // forrest
+						case 3: // forest
+							//TODO: TileFactory
+							this._addEntity(new ForestTile({
+								id: "tile_" + rowIndex + "_" + cellIndex,
+								x: cellIndex * 16 + 8,
+								y: rowIndex * 16 + 8
+							}));
+
 							break;
 						case 4: // ice
+							//TODO: TileFactory
+							this._addEntity(new WaterTile({
+								id: "tile_" + rowIndex + "_" + cellIndex,
+								x: cellIndex * 16 + 8,
+								y: rowIndex * 16 + 8
+							}));
+
 							break;
 						case 5: // water
+							//TODO: TileFactory
+							this._addEntity(new IceTile({
+								id: "tile_" + rowIndex + "_" + cellIndex,
+								x: cellIndex * 16 + 8,
+								y: rowIndex * 16 + 8
+							}));
+
 							break;
 					}
 				}, this);
 			}, this);
-
-			this._createWalls();
 		},
 
-		_addEntity: function (entity) {
-			this.box.addBody(entity);
-
-			//shims
-			this.box.bodiesMap[entity.id].GetFixtureList().SetSensor(entity.isSensor);
-
-			this.entities[entity.id] = entity;
-		},
-
-		_createWalls: function () {
-			var topWall = new Rectangle({
-				id: "wall_top",
-				x: 208,
-				y: -1,
-				halfWidth: 208,
-				halfHeight: 1,
-				staticBody: true,
-				friction: 0,
-				restitution: 0,
-				draw: function () {}
-			}), bottomWall = new Rectangle({
-				id: "wall_bottom",
-				x: 208,
-				y: 417,
-				halfWidth: 208,
-				halfHeight: 1,
-				staticBody: true,
-				friction: 0,
-				restitution: 0,
-				draw: function () {}
-			}), leftWall = new Rectangle({
-				id: "wall_left",
-				x: -1,
-				y: 208,
-				halfWidth: 1,
-				halfHeight: 208,
-				staticBody: true,
-				friction: 0,
-				restitution: 0,
-				draw: function () {}
-			}), rightWall = new Rectangle({
-				id: "wall_right",
-				x: 417,
-				y: 208,
-				halfWidth: 1,
-				halfHeight: 208,
-				staticBody: true,
-				friction: 0,
-				restitution: 0,
-				draw: function () {}
-			});
-
-			this.box.addBody(topWall);
-			this.entities[topWall.id] = topWall;
-
-			this.box.addBody(bottomWall);
-			this.entities[bottomWall.id] = bottomWall;
-
-			this.box.addBody(leftWall);
-			this.entities[leftWall.id] = leftWall;
-
-			this.box.addBody(rightWall);
-			this.entities[rightWall.id] = rightWall;
-		},
-
-		_createPlayer: function (id) {
-			var self = this;
-			var player = new Rectangle({
-				id: "player_" + id,
-				x: 144,
-				y: 400,
-				halfWidth: 15,
-				halfHeight: 15,
-				restitution: 0,
-				friction: 0,
-				staticBody: false,
-				direction: "up",
-				draw: function(ctx) {
-					ctx.save();
-
-					var playerImg;
-					switch (this.direction) {
-						case "up":
-							playerImg = player1_0_up;
-							break;
-						case "down":
-							playerImg = player1_0_down;
-							break;
-						case "left":
-							playerImg = player1_0_left;
-							break;
-						case "right":
-							playerImg = player1_0_right;
-							break;
-					}
-					
-					ctx.drawImage(
-						playerImg,
-						(this.x-this.halfWidth) * this.scale,
-						(this.y-this.halfHeight) * this.scale
-					);
-		      
-					ctx.restore();
-				}
-			});
-			
-			this.box.addBody(player);
-			this.entities[player.id] = player;
-
-			this.box.bodiesMap[player.id].SetFixedRotation(true);
-
-			return player;
-		},
-
-		_createTile: function (rowIndex, cellIndex, tileType, corner) {
-			var self = this;
-			var tile = new Rectangle({
-				id: "tile_" + rowIndex + "_" + cellIndex + "_" + corner,
-				x: cellIndex * 16 + self._cornerOffset[corner].x + 4,
-				y: rowIndex * 16 + self._cornerOffset[corner] .y+ 4,
-				halfWidth: 4,
-				halfHeight: 4,
-				restitution: 0,
-				friction: 0,
-				staticBody: true,
-				draw: function(ctx) {
-					ctx.save();
-					
-					ctx.drawImage(
-						self._tileImage[tileType][corner],
-						(this.x-this.halfWidth) * this.scale,
-						(this.y-this.halfHeight) * this.scale
-					);
-		      
-					ctx.restore();
-				}
-			});
-
-			this.box.addBody(tile);
-			this.entities[tile.id] = tile;
-
-			return tile;
-		},
-
-		_createBullet: function (position, velocity) {
-			var self = this;
-			var bulletImg;
-			
-			if (velocity.x > 0) {
-				bulletImg = bullet_0_right;
-			} else if (velocity.x < 0) {
-				bulletImg = bullet_0_left;
-			} else if (velocity.y > 0) {
-				bulletImg = bullet_0_down;
-			} else if (velocity.y < 0) {
-				bulletImg = bullet_0_up;
+		_createWalls: function (mapSizeX, mapSizeY) {
+			var i;
+			for (i = -1; i <= mapSizeX; i++) {
+				this._addEntity(new Wall({
+					id: "wallX_Bottom_" + i,
+					x: i * 16 + 8,
+					y: -8
+				}));
+				this._addEntity(new Wall({
+					id: "wallX_Top_" + i,
+					x: i * 16 + 8,
+					y: mapSizeY * 16 + 8
+				}));
 			}
-
-			var bullet = new Rectangle({
-				id: "bullet_",
-				x: position.x,
-				y: position.y,
-				halfWidth: 4,
-				halfHeight: 4,
-				restitution: 0,
-				friction: 0,
-				staticBody: false,
-				draw: function(ctx) {
-					ctx.save();
-					
-					if (this.state === "exploded") {
-						ctx.drawImage(
-							explosion,
-							(this.x) * this.scale - 16,
-							(this.y) * this.scale - 16
-						);
-						this.state = "dead";
-					} else {
-						ctx.drawImage(
-							bulletImg,
-							(this.x-this.halfWidth) * this.scale,
-							(this.y-this.halfHeight) * this.scale
-						);
-					}
-		      
-					ctx.restore();
-				}
-			});
-
-			this.box.addBody(bullet);
-			this.entities[bullet.id] = bullet;
-			this.box.setLinearVelocity(bullet.id, velocity.x, velocity.y);
-			return bullet;
+			for (i = 0; i < mapSizeY; i++) {
+				this._addEntity(new Wall({
+					id: "wallY_Left_" + i,
+					x: -8,
+					y: i * 16 + 8
+				}));
+				this._addEntity(new Wall({
+					id: "wallY_Right_" + i,
+					x: mapSizeX * 16 + 8,
+					y: i * 16 + 8
+				}));
+			}
 		}
 	});
-
 });

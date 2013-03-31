@@ -1,0 +1,1 @@
+/usr/local/bin/node --debug amd_modules/dojo/dojo.js load=src/server/run.js

@@ -1,13 +1,21 @@
 define([
 	"dojo/_base/declare",
 
-	"frozen/box2d/RectangleEntity"
+	"bco-client/entity/_Obstacle",
+	"bco-client/entity/Tile",
+
+	"frozen/plugins/loadImage!script/bco-client/image/wall.png"	
 ], function (
 	declare,
 	
-	RectangleEntity) {
+	_Obstacle,
+	Tile,
 
-	return declare([RectangleEntity], {
+	wallTileImage) {
 
+	return declare([Tile, _Obstacle], {
+		layerMask: 3,
+		tileImage: wallTileImage,
+		resistance: 10
 	});
 });

@@ -3,8 +3,8 @@ define({
 		module: "box2dweb"
 	},
 	
-	demoGameWidget: {
-		module: "bco-client/DemoGame"
+	gamePlayView: {
+		module: "bco-client/GamePlayView"
 	},
 	
     viewContainer: {
@@ -16,7 +16,7 @@ define({
                     views: {
                         home: {
                         	center: { 
-                        		widget: { $ref: "demoGameWidget" }
+                        		widget: { $ref: "gamePlayView" }
                         	}
                         }
                     }

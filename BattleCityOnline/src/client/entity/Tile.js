@@ -1,28 +1,17 @@
 define([
 	"dojo/_base/declare",
 
-	"frozen/box2d/RectangleEntity",
-
-	"bco-client/entity/_ContactAwareMixin",
-	"bco-client/entity/_NonBulletMixin",
+	"bco-client/entity/_Entity"
 ], function (
 	declare,
 	
-	RectangleEntity,
+	_Entity) {
 
-	_ContactAwareMixin,
-	_NonBulletMixin) {
-
-	return declare([RectangleEntity, _ContactAwareMixin, _NonBulletMixin], {
+	return declare([_Entity], {
 		halfWidth: 8,
 		halfHeight: 8,
-		
-		restitution: 0,
-		friction: 0,
-		isSensor: true,
-		
 		staticBody: true,
-
+		
 		tileImage: null,
 
 		draw: function (ctx) {
