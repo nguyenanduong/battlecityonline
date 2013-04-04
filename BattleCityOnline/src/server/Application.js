@@ -79,6 +79,7 @@ define([
             game._players = [post.playerId];
             game._started = false;
             game._commands = [];
+            game._turns = [];
             game._dispatcherDfd = new Deferred();
             game._interval = setInterval(function () {
                 // process commands
@@ -87,6 +88,9 @@ define([
                 game._dispatcherDfd.resolve(commands);
 
                 game._dispatcherDfd = new Deferred();
+                if (game._started) {
+                    game._turns.push(commands);
+                }
                 game.commands = [];
             }.bind(this), 40);
 
@@ -105,6 +109,11 @@ define([
                 res.send(500, "Slot not availabe!");
                 return;
             };
+
+            if (game._started) {
+                res.send(500, "Game is already started!");
+                return;
+            }
 
             game._players.push(post.playerId);
 
