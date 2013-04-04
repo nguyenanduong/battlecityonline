@@ -22,7 +22,7 @@ define([
 
 		onBeginContact: function (contactor) {
 			contactor.slipperize(true);
-			return true;
+			return false;
 		}
 	});
 });

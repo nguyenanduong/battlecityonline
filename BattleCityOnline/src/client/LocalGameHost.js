@@ -13,10 +13,27 @@ define([
 
 	return declare([_GameHost], {
 		waiting: false,
-		_started: false,
-		_turns: null,
 
-		sendCommands: function(commands) {
+		_started: false,
+
+		create: function (playerId, settings) {
+			var dfd = new Deferred();
+
+			require(["bco-client/map/" + settings.stage], function (stageSpec) {
+				dfd.resolve({
+					gameId: "Local game",
+					stageSpec: stageSpec
+				});
+			});
+
+			return dfd;
+		},
+
+		join: function () {
+			throw("Not implemented");
+		},
+
+		sendCommands: function(gameId, playerId, commands) {
 			var dfd = new Deferred();
 			
 			this.waiting = true;
@@ -30,7 +47,7 @@ define([
 			setTimeout(function () {
 				dfd.resolve(this._started ? commands.filter(function (command) { return !!command.target; }) : []);
 				this.waiting = false;		
-			}.bind(this), 40);
+			}.bind(this), 20);
 
 			return dfd.promise;
 		}

@@ -15,6 +15,7 @@ define([
     
     return declare([_Object], {
         express: null,
+        uuid: null,
         port: null,
         
         clientModules: null,
@@ -33,7 +34,10 @@ define([
                     app.use("/script/" + module.name, this.express.static(module.path));                       
                 }, this);
 
-                app.post("/gamehost/", this._handleGameHost.bind(this));
+                // TODO: Too many concerns
+                app.post("/gamehost/create", this._createGame.bind(this));
+                app.post("/gamehost/:gameId/join", this._joinGame.bind(this));
+                app.post("/gamehost/:gameId/command", this._handleCommand.bind(this));
 
                 app.use(this.express.static("public_html"));
 
@@ -57,42 +61,84 @@ define([
         _commands: [],
         _dispatcherDfd: null,
 
-        _handleGameHost: function (req, res) {
+        _games: [],
+        _gameCount: 0,
+
+        _createGame: function (req, res) {
+            var post = req.body;
+
+            var game = {
+                gameId: "Game_" + (++this._gameCount), //uuid.v1(),
+                stage: post.settings.stage,
+                masterPlayer: post.playerId
+            };
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(json.stringify(game));
+
+            game._players = [post.playerId];
+            game._started = false;
+            game._commands = [];
+            game._dispatcherDfd = new Deferred();
+            game._interval = setInterval(function () {
+                // process commands
+                // TODO: turn history
+                var commands = game._started ? game._commands.filter(function (command) { return !!command.target; }) : []
+                game._dispatcherDfd.resolve(commands);
+
+                game._dispatcherDfd = new Deferred();
+                game.commands = [];
+            }.bind(this), 40);
+
+            this._games[game.gameId] = game;
+        },
+
+        _joinGame: function (req, res) {
+            var post = req.body;
+
+            var gameId = req.params["gameId"],
+                game = this._games[gameId];
+
+            if (game._players.some(function (player) {
+                return player === post.playerId;
+            })) {
+                res.send(500, "Slot not availabe!");
+                return;
+            };
+
+            game._players.push(post.playerId);
+
+            //TODO: Return all turns from beginning
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(json.stringify({
+                gameId: game.gameId,
+                stage: game.stage,
+                masterPlayer: game.masterPlayer
+            }));
+        },
+
+        _handleCommand: function (req, res) {
             var post = req.body;
             var commands = post.commands || [],
-                clientId = post.clientId;
+                playerId = post.playerId;
 
-            if (!this._clients.some(function (client) {
-                return client === clientId;
-            })) {
-                this._clients.push(clientId);
-            }
+            var gameId = req.params["gameId"],
+                game = this._games[gameId];
+
+            //console.log(gameId);
 
             if (commands.some(function (command) {
                 return command.name === "START";
-            })) {
-                this._started = true;
+            }) && playerId == game.masterPlayer) {
+                game._started = true;
             }
 
-            this._received++;
+            game._commands = this._commands.concat(commands);
 
-            this._commands = this._commands.concat(commands);
-
-            if (!this._dispatcherDfd) {
-                this._dispatcherDfd = new Deferred();
-            }
-
-            when(this._dispatcherDfd, function (synthCommands) {
+            when(game._dispatcherDfd, function (synthCommands) {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(json.stringify(synthCommands));
             }.bind(this));
-
-            if (this._received === this._clients.length) {
-                this._received = 0;
-                this._dispatcherDfd.resolve(this._started ? this._commands.filter(function (command) { return !!command.target; }) : []);
-                this._dispatcherDfd = null;
-                this._commands = [];
-            }
         }
     });
 });

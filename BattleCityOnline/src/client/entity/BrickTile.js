@@ -26,10 +26,10 @@ define([
 		_originalX: null,
 		_originalY: null,
 
-		explode: function (power, direction) {
+		explode: function (source, power, direction) {
 			if (power > 1) {
 				this.state = "dead";
-				return;
+				return true;
 			}
 
 			var x = this.x * this.scale,
@@ -86,6 +86,8 @@ define([
 
 			this.setPosition(x, y);
 			this.setSize(halfW, halfH);
+
+			return this.state === "dead";
 		},
 
 		draw: function (ctx) {

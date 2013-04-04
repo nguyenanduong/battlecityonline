@@ -9,8 +9,7 @@ define([
 
 	return declare([Tile], {
 		onBeginContact: function (contactor) {
-			contactor.stepBack();
-			return false;
+			return contactor.stepBack(this);
 		}	
 	});
 });

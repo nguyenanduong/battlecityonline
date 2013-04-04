@@ -32,8 +32,11 @@ define([
 	
 	return declare([BoxGame], {
 		canvas: null,
+
 		stageSpec: null,
-		playerColor: null,
+
+		playerId: null,
+		gameId: null,
 
 		gameHost: null,
 		
@@ -135,7 +138,7 @@ define([
 				});
 			}
 			
-			when(this.gameHost.sendCommands(commands), this.handleCommands.bind(this));
+			when(this.gameHost.sendCommands(this.gameId, this.playerId, commands), this.handleCommands.bind(this));
 		},
 
 		handleCommands: function (commands) {
@@ -177,10 +180,10 @@ define([
 						entity2 = self.entities[id2];
 
 					if (entity1.layerMask & entity2.layerMask) {
-						var entity1AllowContact = entity1.onBeginContact(entity2);
-							entity2AllowContact = entity2.onBeginContact(entity1);
+						var entity1CancelledContact = entity1.onBeginContact(entity2);
+							entity2CancelledContact = entity2.onBeginContact(entity1);
 	
-						if (!entity1AllowContact && !entity2AllowContact) {
+						if (entity1CancelledContact && entity2CancelledContact) {
 							b2Contact.m_flags &= !0x0010;
 						}
 					}
@@ -202,6 +205,19 @@ define([
 			this._createTiles(this.stageSpec.map);
 
 			this._createWalls(this.stageSpec.size.w, this.stageSpec.size.h);
+		},
+
+		start: function () {
+			when(this.gameId ? 
+				this.gameHost.join(this.gameId, this.playerId) :
+				this.gameHost.create(this.playerId, { stage: "stageX" }), 
+				function (game) {
+					this.gameId = game.gameId;
+					this.stageSpec = game.stageSpec;
+					this.run();
+
+				}.bind(this)
+			);
 		},
 
 		_addEntity: function (entity) {
@@ -226,7 +242,7 @@ define([
 				
 				this._addEntity(playerObj);
 
-				if (player.color === this.playerColor) {
+				if (player.color === this.playerId) {
 					this.player = playerObj;
 				}
 			}, this);

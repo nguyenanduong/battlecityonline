@@ -28,6 +28,7 @@ define([
 	return declare([_WidgetBase, _TemplatedMixin], {
 		templateString: template,
 
+		game: null,
 		color: null,
 		
 		postCreate: function () {
@@ -35,14 +36,14 @@ define([
 
 			var game = new BattleCityGame({
 				canvas: this._canvas,
-				stageSpec: stage1,
-				playerColor: this.color,
-				gameHost: new HttpGameHost({
-					clientId: this.color
-				})
+				
+				gameId: this.game,
+				playerId: this.color,
+
+				gameHost: new HttpGameHost()
 			});
 
-			game.run();
+			game.start();
 		}
 	});
 

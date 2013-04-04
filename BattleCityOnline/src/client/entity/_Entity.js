@@ -104,14 +104,17 @@ define([
 			this._isSlippery += on ? 1 : -1;
 		},
 
-		stepBack: function () {
-			this._stepBack = true;
+		stepBack: function (obstacle) {
+			return this._stepBack = true;
 		},
 
-		explode: function (power, direction) {
-			if (power > this.resistance) {
+		explode: function (source, power, direction) {
+			if (source !== this && power > this.resistance) {
 				this.state = "dead";
+				return true;
 			}
+
+			return false;
 		},
 
 		onBeforeUpdate: function () {

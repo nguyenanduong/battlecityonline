@@ -55,12 +55,16 @@ define([
 		},
 
 		onBeginContact: function(contactor) {
-			contactor.explode(this.power, this.direction);
-			return false;
+			return contactor.explode(this.source, this.power, this.direction);
 		},
 
-		stepBack: function () {
-			this.state = "dead";
+		stepBack: function (obstacle) {
+			if (obstacle !== this.source) {
+				this.state = "dead";
+				return true;
+			}
+
+			return false;
 		}
 	});
 });

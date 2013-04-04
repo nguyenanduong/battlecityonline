@@ -17,7 +17,7 @@ define([
 		halfWidth: 15,
 		halfHeight: 15,
 
-		layerMask: 1,
+		layerMask: 3,
 
 		images: null,
 
@@ -77,10 +77,12 @@ define([
 				y = this.y * this.scale + this._bulletStartOffset[this.direction].y;
 
 			this._bullet = new Bullet({
+				id: "bullet_" + this.id,
 				x: x,
 				y: y,
 				direction: this.direction,
-				speed: 8
+				speed: 8,
+				source: this
 			});
 
 

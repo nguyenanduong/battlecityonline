@@ -2,6 +2,10 @@ define({
     express: {
         module: "dojo/node!express"
     },
+
+    /*uuid: {
+        module: "dojo/node!node-uuid"
+    },*/
     
     application: {
         create: {
@@ -9,6 +13,8 @@ define({
             args: {
                 port: 8283,                
                 express: { $ref: "express" },
+                //uuid: { $ref: "uuid" },
+                
                 clientModules: [
                     { name: "dojo", path: "amd_modules/dojo" },
                     { name: "dijit", path: "amd_modules/dijit" },
