@@ -27,11 +27,11 @@ define([
         run: function () {
             var app = this.express();
             
-            app.configure((function () {
+            app.configure(function () {
                 app.use(this.express.bodyParser());
 
                 this.clientModules.forEach(function(module) {
-                    app.use("/script/" + module.name, this.express.static(module.path));                       
+                    app.use("/script/" + module.name, this.express.static(module.path));
                 }, this);
 
                 // TODO: Too many concerns
@@ -42,7 +42,7 @@ define([
                 app.use(this.express.static("public_html"));
 
                 app.use(this._handleServerError);
-            }).bind(this));
+            }.bind(this));
             
             var port = this.port || 80;
             app.listen(port);
@@ -84,7 +84,8 @@ define([
             game._interval = setInterval(function () {
                 // process commands
                 // TODO: turn history
-                var commands = game._started ? game._commands.filter(function (command) { return !!command.target; }) : []
+                var commands = game._started ? game._commands.filter(function (command) { return !!command.target; }) : [];
+
                 game._dispatcherDfd.resolve(commands);
 
                 game._dispatcherDfd = new Deferred();
@@ -100,7 +101,7 @@ define([
         _joinGame: function (req, res) {
             var post = req.body;
 
-            var gameId = req.params["gameId"],
+            var gameId = req.params.gameId,
                 game = this._games[gameId];
 
             if (game._players.some(function (player) {
@@ -108,7 +109,7 @@ define([
             })) {
                 res.send(500, "Slot not availabe!");
                 return;
-            };
+            }
 
             if (game._started) {
                 res.send(500, "Game is already started!");
@@ -131,14 +132,14 @@ define([
             var commands = post.commands || [],
                 playerId = post.playerId;
 
-            var gameId = req.params["gameId"],
+            var gameId = req.params.gameId,
                 game = this._games[gameId];
 
             //console.log(gameId);
 
             if (commands.some(function (command) {
                 return command.name === "START";
-            }) && playerId == game.masterPlayer) {
+            }) && playerId === game.masterPlayer) {
                 game._started = true;
             }
 

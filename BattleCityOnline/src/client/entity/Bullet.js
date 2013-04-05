@@ -6,7 +6,7 @@ define([
 	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_up.png",
 	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_down.png",
 	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_left.png",
-	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_right.png"	
+	"frozen/plugins/loadImage!script/bco-client/image/bullet_0_right.png"
 ], function (
 	declare,
 	

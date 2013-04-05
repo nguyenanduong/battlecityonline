@@ -3,7 +3,7 @@ define([
 
 	"bco-client/entity/Tile",
 
-	"frozen/plugins/loadImage!script/bco-client/image/forest.png"	
+	"frozen/plugins/loadImage!script/bco-client/image/forest.png"
 ], function (
 	declare,
 	

@@ -46,10 +46,10 @@ define([
 
 			setTimeout(function () {
 				dfd.resolve(this._started ? commands.filter(function (command) { return !!command.target; }) : []);
-				this.waiting = false;		
+				this.waiting = false;
 			}.bind(this), 20);
 
 			return dfd.promise;
 		}
-	});	
+	});
 });

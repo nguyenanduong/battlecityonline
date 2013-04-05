@@ -17,7 +17,7 @@ define([
 	_WidgetBase,
 	_TemplatedMixin,
 	
-	BattleCityGame, 
+	BattleCityGame,
 
 	HttpGameHost,
 	LocalGameHost,

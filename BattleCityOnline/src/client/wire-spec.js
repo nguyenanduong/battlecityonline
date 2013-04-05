@@ -1,12 +1,12 @@
 define({
-	box2D: {
-		module: "box2dweb"
-	},
-	
-	gamePlayView: {
-		module: "bco-client/GamePlayView"
-	},
-	
+    box2D: {
+        module: "box2dweb"
+    },
+    
+    gamePlayView: {
+        module: "bco-client/GamePlayView"
+    },
+    
     viewContainer: {
         create: {
             module: "bco-client/ViewContainer",
@@ -15,9 +15,9 @@ define({
                     defaultView: "home",
                     views: {
                         home: {
-                        	center: { 
-                        		widget: { $ref: "gamePlayView" }
-                        	}
+                            center: {
+                                widget: { $ref: "gamePlayView" }
+                            }
                         }
                     }
                 },
@@ -25,7 +25,7 @@ define({
                 { $ref: "dom!root" }
             ]
         }
-    },    
+    },
     
     application: {
         create: {

@@ -10,6 +10,6 @@ define([
 	return declare([Tile], {
 		onBeginContact: function (contactor) {
 			return contactor.stepBack(this);
-		}	
+		}
 	});
 });

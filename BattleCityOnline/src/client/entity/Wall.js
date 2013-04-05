@@ -4,7 +4,7 @@ define([
 	"bco-client/entity/_Obstacle",
 	"bco-client/entity/Tile",
 
-	"frozen/plugins/loadImage!script/bco-client/image/wall.png"	
+	"frozen/plugins/loadImage!script/bco-client/image/wall.png"
 ], function (
 	declare,
 	

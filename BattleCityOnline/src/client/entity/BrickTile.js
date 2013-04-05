@@ -4,10 +4,10 @@ define([
 	"bco-client/entity/_Obstacle",
 	"bco-client/entity/Tile",
 
-	"frozen/plugins/loadImage!script/bco-client/image/brick_00.png",	
+	"frozen/plugins/loadImage!script/bco-client/image/brick_00.png",
 	"frozen/plugins/loadImage!script/bco-client/image/brick_01.png",
-	"frozen/plugins/loadImage!script/bco-client/image/brick_10.png",	
-	"frozen/plugins/loadImage!script/bco-client/image/brick_11.png"	
+	"frozen/plugins/loadImage!script/bco-client/image/brick_10.png",
+	"frozen/plugins/loadImage!script/bco-client/image/brick_11.png"
 ], function (
 	declare,
 	
@@ -40,11 +40,11 @@ define([
 			switch (direction) {
 				case "up":
 					if (this._corners[1][0] || this._corners[1][1]) {
-						this._corners[1][0] = this._corners[1][1] = false;						
+						this._corners[1][0] = this._corners[1][1] = false;
 					} else {
 						this._corners[0][0] = this._corners[0][1] = false;
 						this.state = "dead";
-					} 
+					}
 					y -= 8;
 					halfH /= 2;
 
@@ -95,7 +95,7 @@ define([
 				this._corners = [
 					[true, true],
 					[true, true]
-				]
+				];
 				this._originalX = this.x;
 				this._originalY = this.y;
 			}

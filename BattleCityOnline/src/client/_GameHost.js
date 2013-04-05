@@ -20,5 +20,5 @@ define([
 		sendCommands: function (gameId, playerId, commands) {
 
 		}
-	});	
+	});
 });

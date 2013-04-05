@@ -1,5 +1,5 @@
 define([
-    "dojo/_base/declare",    
+    "dojo/_base/declare",
     "bco-common/_Object"
 ], function (
     declare,
@@ -9,7 +9,7 @@ define([
         viewContainer: null,
         
         run: function () {
-        	viewContainer.startup();    
+            this.viewContainer.startup();
         }
     });
 });

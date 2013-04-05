@@ -50,7 +50,7 @@ define([
 		_drawEntities: function(context) {
 			var entities = [];
 
-			for (entityId in this.entities) {
+			for (var entityId in this.entities) {
 				entities.push(this.entities[entityId]);
 			}
 
@@ -87,7 +87,7 @@ define([
 					this.box.removeBody(entityId);
 					delete this.entities[entityId];
 				}
-			}			
+			}
 		},
 
 		handleInput: function (im, ellapsedTime) {
@@ -130,7 +130,7 @@ define([
 					target: this.player.id,
 					name: "FIRE"
 				});
-			}			
+			}
 
 			if (im.keyActions[keys.ENTER].isPressed()) {
 				commands.push({
@@ -180,7 +180,7 @@ define([
 						entity2 = self.entities[id2];
 
 					if (entity1.layerMask & entity2.layerMask) {
-						var entity1CancelledContact = entity1.onBeginContact(entity2);
+						var entity1CancelledContact = entity1.onBeginContact(entity2),
 							entity2CancelledContact = entity2.onBeginContact(entity1);
 	
 						if (entity1CancelledContact && entity2CancelledContact) {
@@ -208,9 +208,9 @@ define([
 		},
 
 		start: function () {
-			when(this.gameId ? 
+			when(this.gameId ?
 				this.gameHost.join(this.gameId, this.playerId) :
-				this.gameHost.create(this.playerId, { stage: "stageX" }), 
+				this.gameHost.create(this.playerId, { stage: "stageX" }),
 				function (game) {
 					this.gameId = game.gameId;
 					this.stageSpec = game.stageSpec;

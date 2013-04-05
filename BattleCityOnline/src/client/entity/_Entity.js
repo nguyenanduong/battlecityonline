@@ -75,7 +75,7 @@ define([
 
 		move: function (direction, sliding) {
 			var x = this.x * this.scale,
-				y = this.y * this.scale;				 
+				y = this.y * this.scale;
 
 			if (direction !== this.direction) {
 				x = Math.round(x / 16) * 16;
@@ -129,7 +129,7 @@ define([
 				this._prevX = this._prevY = null;
 				this._stepBack = false;
 			} else if (!this._moving && this._isSlippery && this._inertia > 0) {
-				this.move(this.direction, true)
+				this.move(this.direction, true);
 				this._inertia--;
 			}
 

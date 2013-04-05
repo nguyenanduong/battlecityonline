@@ -16,8 +16,8 @@ define([
     lang,
     router,
     
-    _WidgetBase, 
-    _TemplatedMixin, 
+    _WidgetBase,
+    _TemplatedMixin,
     _WidgetsInTemplateMixin,
     
     BorderContainer,
@@ -36,7 +36,7 @@ define([
         postCreate: function () {
             this.inherited(arguments);
 
-            router.register(/^(\w*)\?(.*)$/, (this, function (evt) {
+            router.register(/^(\w*)\?(.*)$/, this, function (evt) {
                 var viewName = evt.params[0],
                     paramString = evt.params[1],
                     paramHash = {};
@@ -49,9 +49,9 @@ define([
                 }
                                 
                 this._loadView(viewName, paramHash);
-            }).bind(this));
+            }.bind(this));
 
-            router.startup();   
+            router.startup();
         },
         
         destroy: function () {
@@ -62,9 +62,9 @@ define([
         _loadView: function (viewName, params) {
             var view = this.views[viewName];
             
-            this._unloadCurrentView();            
+            this._unloadCurrentView();
             
-            var region, widgetCtor, settings;            
+            var region, widgetCtor, settings;
             for (region in view) {
                 widgetCtor = view[region].widget;
                 settings = view[region].settings;
@@ -83,7 +83,7 @@ define([
                     widget.destroy();
                 });
                 this._currentViewWidgets = [];
-            }      
+            }
         }
     });
 });

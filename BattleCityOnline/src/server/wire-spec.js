@@ -11,7 +11,7 @@ define({
         create: {
             module: "bco-server/Application",
             args: {
-                port: 8283,                
+                port: 8283,
                 express: { $ref: "express" },
                 //uuid: { $ref: "uuid" },
                 
@@ -33,5 +33,5 @@ define({
                 ]
             }
         }
-    }    
+    }
 });

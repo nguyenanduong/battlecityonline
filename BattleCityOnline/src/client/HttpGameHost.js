@@ -42,7 +42,7 @@ define([
 				return {
 					gameId: game.gameId,
 					stageSpec: stageSpec
-				}
+				};
 			}.bind(this));
 		},
 
@@ -63,7 +63,7 @@ define([
 						gameId: gameId,
 						stageSpec: stageSpec
 					});
-				});				
+				});
 
 				return stageLoad.promise;
 			}.bind(this));
@@ -89,5 +89,5 @@ define([
 
 			return dfd.promise;
 		}
-	});	
+	});
 });
