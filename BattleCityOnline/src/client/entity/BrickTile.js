@@ -27,8 +27,9 @@ define([
 		_originalY: null,
 
 		explode: function (source, power, direction) {
+			this.explodeSound.play();
 			if (power > 1) {
-				this.state = "dead";
+				this.setToDie();
 				return true;
 			}
 
@@ -43,7 +44,7 @@ define([
 						this._corners[1][0] = this._corners[1][1] = false;
 					} else {
 						this._corners[0][0] = this._corners[0][1] = false;
-						this.state = "dead";
+						this.setToDie();
 					}
 					y -= 8;
 					halfH /= 2;
@@ -54,7 +55,7 @@ define([
 						this._corners[0][0] = this._corners[0][1] = false;
 					} else {
 						this._corners[1][0] = this._corners[1][1] = false;
-						this.state = "dead";
+						this.setToDie();
 					}
 					y += 8;
 					halfH /= 2;
@@ -65,7 +66,7 @@ define([
 						this._corners[0][1] = this._corners[1][1] = false;
 					} else {
 						this._corners[0][0] = this._corners[1][0] = false;
-						this.state = "dead";
+						this.setToDie();
 					}
 					x -= 8;
 					halfW /= 2;
@@ -76,7 +77,7 @@ define([
 						this._corners[0][0] = this._corners[1][0] = false;
 					} else {
 						this._corners[0][1] = this._corners[1][1] = false;
-						this.state = "dead";
+						this.setToDie();
 					}
 					x += 8;
 					halfW /= 2;

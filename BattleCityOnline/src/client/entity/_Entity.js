@@ -1,9 +1,15 @@
 define([
 	"dojo/_base/declare",
 
+	"frozen/plugins/loadSound!script/bco-client/sound/bullet_hit_1.ogg",
+	"frozen/plugins/loadSound!script/bco-client/sound/bullet_hit_2.ogg",
+
 	"frozen/box2d/RectangleEntity"
 ], function (
 	declare,
+
+	bullet_hit_1,
+	bullet_hit_2,
 	
 	RectangleEntity) {
 
@@ -25,6 +31,9 @@ define([
 		_stepBack: false,
 		_moving: false,
 		_inertia: 0,
+
+		explodeSound: bullet_hit_2,
+		resistSound: bullet_hit_1,
 		
 		_moveMatrix: {
 			"up": { x: 0, y: -1 },
@@ -110,15 +119,32 @@ define([
 
 		explode: function (source, power, direction) {
 			if (source !== this && power > this.resistance) {
-				this.state = "dead";
+				this.explodeSound.play();
+				this.setToDie();
 				return true;
 			}
 
+			this.resistSound.play();
 			return false;
 		},
 
+		setToDie: function () {
+			this._toDie = true;
+		},
+
+		die: function () {
+			this.state = "dead";
+		},
+
+		isAlive: function () {
+			return this.state !== "dead";
+		},
+
 		onBeforeUpdate: function () {
-			if (this.autoMove) {
+			if (this._toDie) {
+				this._toDie = false;
+				this.die();
+			} else if (this.autoMove && this.isAlive()) {
 				this.move(this.direction);
 			}
 		},

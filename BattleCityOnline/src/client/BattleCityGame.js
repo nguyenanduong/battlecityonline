@@ -82,12 +82,7 @@ define([
 				this.entities[entityId].onAfterUpdate();
 			}
 
-			for (entityId in this.entities) {
-				if (this.entities[entityId].state === "dead") {
-					this.box.removeBody(entityId);
-					delete this.entities[entityId];
-				}
-			}
+			this._removeDeadEntities();
 		},
 
 		handleInput: function (im, ellapsedTime) {
@@ -144,7 +139,7 @@ define([
 		handleCommands: function (commands) {
 			commands.forEach(function (command) {
 				var entity = this.entities[command.target],
-					result = entity.command(command.name);
+					result = entity.isAlive() ? entity.command(command.name) : null;
 
 				if (result) {
 					this._addEntity(result);
@@ -179,7 +174,7 @@ define([
 					var entity1 = self.entities[id1],
 						entity2 = self.entities[id2];
 
-					if (entity1.layerMask & entity2.layerMask) {
+					if (entity1.layerMask & entity2.layerMask && entity1.isAlive() && entity2.isAlive()) {
 						var entity1CancelledContact = entity1.onBeginContact(entity2),
 							entity2CancelledContact = entity2.onBeginContact(entity1);
 	
@@ -192,7 +187,7 @@ define([
 					var entity1 = self.entities[id1],
 						entity2 = self.entities[id2];
 						
-					if (entity1.layerMask & entity2.layerMask) {
+					if (entity1.layerMask & entity2.layerMask && entity1.isAlive() && entity2.isAlive()) {
 						entity1.onEndContact(entity2);
 						entity2.onEndContact(entity1);
 					}
@@ -224,9 +219,20 @@ define([
 			this.box.addBody(entity);
 
 			//shims
+			this.box.bodiesMap[entity.id].SetSleepingAllowed(false);
+			this.box.bodiesMap[entity.id].SetAwake(true);
 			this.box.bodiesMap[entity.id].GetFixtureList().SetSensor(entity.isSensor);
 			entity.box = this.box;
 			this.entities[entity.id] = entity;
+		},
+
+		_removeDeadEntities: function() {
+			for (var entityId in this.entities) {
+				if (this.entities[entityId].state === "dead") {
+					this.box.removeBody(entityId);
+					delete this.entities[entityId];
+				}
+			}
 		},
 
 		_createPlayers: function (players) {

@@ -36,7 +36,7 @@ define([
         postCreate: function () {
             this.inherited(arguments);
 
-            router.register(/^(\w*)\?(.*)$/, this, function (evt) {
+            router.register(/^(\w*)\?(.*)$/, function (evt) {
                 var viewName = evt.params[0],
                     paramString = evt.params[1],
                     paramHash = {};
